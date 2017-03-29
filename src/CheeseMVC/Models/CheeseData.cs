@@ -36,11 +36,11 @@ namespace CheeseMVC.Models
             return cheeses.Single(x => x.CheeseId == id);
         }
 
-        //Edit
+        // Edit
         public static void Edit(int id, string name, string description)
         {
             Cheese cheeseToEdit = GetById(id);
-            cheeses.FieldToUpdate(cheeseToEdit);
+            cheeses.Insert(id, name, description);
         }
     }
 }

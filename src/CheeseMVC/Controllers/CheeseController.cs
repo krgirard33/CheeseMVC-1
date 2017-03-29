@@ -1,55 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using CheeseMVC.Models;
-
-
-// For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+using CheeseMVC.ViewModels;
 
 namespace CheeseMVC.Controllers
 {
     public class CheeseController : Controller
     {
 
-
-
         // GET: /<controller>/
         public IActionResult Index()
         {
-            ViewBag.cheeses = CheeseData.GetAll();
-
-            return View();
+            return View(CheeseData.GetAll());
         }
 
         public IActionResult Add()
         {
-            return View();
+            AddCheeseViewModel addCheeseViewModel = new AddCheeseViewModel();
+
+            return View(addCheeseViewModel);
         }
 
         [HttpPost]
-        [Route("/Cheese/Add")]
-        public IActionResult NewCheese(Cheese newCheese)
+        // Add(Cheese newCheese)
+        public IActionResult Add(AddCheeseViewModel addCheeseViewModel)
         {
+            if (ModelState.IsValid)
+            {
+                Cheese newCheese = new Cheese
+                {
+                    Name = addCheeseViewModel.Name,
+                    Description = addCheeseViewModel.Description,
+                    Type = addCheeseViewModel.Type
+                };
 
-            /* This is more or less what the model binding is doing automagically 
-             * for us in this Cheese/Add action
-             * 
-             Cheese newCheese = new Cheese();
-             newCheese.Name = Request.get("name");
-             newCheese.Description = Request.get("description");
-             */
+                CheeseData.Add(newCheese);
 
-            // Add the new cheese to my existing cheeses
-            CheeseData.Add(newCheese);
+                return Redirect("/");
+            }
 
-            return Redirect("/Cheese");
+            return View(addCheeseViewModel);
         }
 
         public IActionResult Remove()
         {
-            ViewBag.title = "Remove Cheese";
+            ViewBag.title = "Remove Cheeses";
             ViewBag.cheeses = CheeseData.GetAll();
             return View();
         }
@@ -57,26 +51,25 @@ namespace CheeseMVC.Controllers
         [HttpPost]
         public IActionResult Remove(int[] cheeseIds)
         {
-            // TODO - remove cheeses from list
             foreach (int cheeseId in cheeseIds)
             {
                 CheeseData.Remove(cheeseId);
-
             }
+
             return Redirect("/");
         }
 
-        public IActionResult Edit(int id)
+        public IActionResult Edit(int cheeseId)
         {
-            ViewBag.cheeses = CheeseData.GetById(id);
+            ViewBag.cheeses = CheeseData.GetById(cheeseId);
             return View();
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, string name, string description)
+        public IActionResult Edit(int cheeseId, string name, string description)
         {
-            ViewBag.cheeses = CheeseData.GetById(id);
-            CheeseData.Edit(name, description);
+            ViewBag.cheeses = CheeseData.GetById(cheeseId);
+            CheeseData.Edit(cheeseId, name, description);
             return Redirect("/");
         }
     }
