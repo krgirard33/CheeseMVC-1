@@ -8,7 +8,8 @@ namespace CheeseMVC.ViewModels
     public class AddCheeseViewModel
     {
         [Required]
-        public string Name { get; set; }
+        [Display(Name = "Cheese Name")]
+        public string Name { get; set; } = "";
 
         public string Description { get; set; }
 
