@@ -1,16 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CheeseMVC.Models;
 using CheeseMVC.ViewModels;
+using System.Collections.Generic;
+using CheeseMVC.Data;
+using System.Linq;
 
 namespace CheeseMVC.Controllers
 {
     public class CheeseController : Controller
     {
+        private CheeseDbContext context;
 
+        public CheeseController(CheeseDbContext dbContext)
+        {
+            context = dbContext;
+        }
         // GET: /<controller>/
         public IActionResult Index()
         {
-            return View(CheeseData.GetAll());
+            List<Cheese> cheeses = context.Cheeses.ToList(); 
+            return View(cheeses);
         }
 
         public IActionResult Add()
@@ -33,9 +42,10 @@ namespace CheeseMVC.Controllers
                     Type = addCheeseViewModel.Type
                 };
 
-                CheeseData.Add(newCheese);
+                context.Cheeses.Add(newCheese);
+                context.SaveChanges();
 
-                return Redirect("/");
+                return Redirect("/Cheese");
             }
 
             return View(addCheeseViewModel);
@@ -44,7 +54,7 @@ namespace CheeseMVC.Controllers
         public IActionResult Remove()
         {
             ViewBag.title = "Remove Cheeses";
-            ViewBag.cheeses = CheeseData.GetAll();
+            ViewBag.cheeses = context.Cheeses.ToList();
             return View();
         }
 
@@ -53,12 +63,14 @@ namespace CheeseMVC.Controllers
         {
             foreach (int cheeseId in cheeseIds)
             {
-                CheeseData.Remove(cheeseId);
+                Cheese theCheese = context.Cheeses.Single(c => c.ID == cheeseId);
+                context.Cheeses.Remove(theCheese);
             }
-
+            context.SaveChanges(); // putting this here means it happens after all the foreach stuff is done. 
             return Redirect("/");
         }
 
+        /*
         public IActionResult Edit(int cheeseId)
         {
             ViewBag.cheeses = CheeseData.GetById(cheeseId);
@@ -72,5 +84,6 @@ namespace CheeseMVC.Controllers
             CheeseData.Edit(cheeseId, name, description);
             return Redirect("/");
         }
+        */
     }
 }
